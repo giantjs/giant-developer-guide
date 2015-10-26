@@ -1,8 +1,4 @@
-Developer Guide
-===============
-
-Chapters
---------
+**Contents**
 
 1. [Introduction](introduction.md)
 2. [Terms](terms.md)

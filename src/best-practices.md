@@ -1,3 +1,6 @@
+<!-- @@@page:manual@@@ -->
+<!-- @@@title:Best Practices@@@ -->
+
 Best Practices
 ==============
 
