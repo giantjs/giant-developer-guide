@@ -1,3 +1,6 @@
+<!-- @@@page:manual@@@ -->
+<!-- @@@title:Introduction@@@ -->
+
 Introduction
 ============
 
@@ -25,7 +28,7 @@ Modules
 
 In Giant, each module takes care of a specific aspect of the application. Modules are self-containing [npm](http://npmjs.org) packages, able to run both in modern browsers and under [Node.js](https://nodejs.org). On the figure below, each bubble represents a module of the framework, organized into 3 tiers: *essentials*, *core*, and *auxiliary*. Modules in one tier may only depend on modules in the same or lower tiers. Modules that are grayed out are not published yet.
 
-![Module structure (Open in new tab to magnify)](https://raw.githubusercontent.com/giantjs/giant-developer-guide/draft/images/Giant%20Modules.png)
+![Module structure (Open in new tab to magnify)](https://raw.githubusercontent.com/giantjs/giant-developer-guide/master/images/Giant%20Modules.png)
 
 ### Essentials tier
 
