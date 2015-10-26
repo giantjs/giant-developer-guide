@@ -23,45 +23,45 @@ Giant encourages the application of these directives to the SPAs built with it.
 Modules
 -------
 
-In Giant, each module takes care of a specific aspect of the application. Modules are self-containing [npm](http://npmjs.org) packages, able to run both in modern browsers and under [Node.js](https://nodejs.org). On the figure below, each bubble represents a module of the framework, organized into 3 tiers: core, framework, and application. Modules in one tier may only depend on modules in the same or lower tiers. Modules that are grayed out are not published yet.
+In Giant, each module takes care of a specific aspect of the application. Modules are self-containing [npm](http://npmjs.org) packages, able to run both in modern browsers and under [Node.js](https://nodejs.org). On the figure below, each bubble represents a module of the framework, organized into 3 tiers: *essentials*, *core*, and *auxiliary*. Modules in one tier may only depend on modules in the same or lower tiers. Modules that are grayed out are not published yet.
 
 ![Module structure (Open in new tab to magnify)](https://raw.githubusercontent.com/giantjs/giant-developer-guide/draft/images/Giant%20Modules.png)
 
-### Core tier modules
+### Essentials tier
 
-Basic functionality for building classes, logging errors, coupling components, and managing data objects.
+Basic functionality for building classes, logging errors, coupling components, and managing templates and data objects.
 
-- **Extensible assertions**: Provides a few built-in assertions and an interface to add new ones.
-- **OOP and testing**: Implements a powerful OOP toolkit that allows multiple inheritance, reflection, and provides means for performance tuning and unit testing.
-- **General utilities**: Low-level utilities, eg. async tools, promises, string, and array manipulation. 
-- **Data structures**: Hash-based data structures such as collections, dictionaries, sets, trees, with functional APIs.
-- **Universal events**: Event dispatching and subscription mechanism that is universally applicable to anything that may be represented by a path.
-- **String templating**: Flexible, evented string-replacement.
-- **Ajax**: Evented API around URLs and `XMLHttpRequest`.
-- **Indexed tables**: Hash-based implementation of indexed querying and updates on JSON objects that represent tables.
+- **assertion**: Provides a few built-in assertions and an interface to add new ones.
+- **oop**: Implements a powerful OOP toolkit that allows multiple inheritance, instance caching, and reflection; provides means for performance tuning and unit testing.
+- **utils**: Low-level utilities, eg. async tools, promises, as well as string, and array manipulation. 
+- **data**: Hash-based data structures such as collections, dictionaries, sets, trees, with functional APIs.
+- **event**: Event dispatching and subscription mechanism that is universally applicable to anything that may be represented by a path. Allows events to be traced back to their origin.
+- **templating**: Flexible, evented string-replacement.
+- **ajax**: Evented API around URLs and `XMLHttpRequest`.
+- **table**: Hash-based implementation of querying and updates on indexed JSON objects that represent tables.
 
-### Framework tier modules:
+### Core tier
 
-Low-level and common application components.
+Low-level and common application components. The core tier alone is enough to build applications, when auxiliary tier models are not necessary or not suitable.
 
-- **API access**
-- **Entity system**
-- **Routing**
-- **Widget system**
-- **Internationalization**
-- **Session management**
-- **General purpose widgets**
+- **rest (transport)**: Implements evented access to REST APIs. Decouples AJAX requests from application components consuming API responses.
+- **entity**: Introduces an evented in-memory datastore for managing documents, fields, and collections, as well as lookups and search indexes. 
+- **routing**: Provides an API for navigation and notifies on route changes.
+- **widget**: Basis for stateful view-controllers. Widgets are self-contained, arranged in a high-level hierarchy (approximating the DOM), and have a life cycle.
+- **i18n**: Provides API for switching locale & obtaining localized strings. Maintains evented, application-wide locale state, introduces quasi-strings that serialize according to the current locale. JSON-based, compatible with [gettext](https://www.gnu.org/software/gettext/). Agnostic re. JSON source.
+- **session**: Provides API for user authentication. Maintains evented, application-wide state for current user. Back-end agnostic.
+- **basic-widgets (common-widgets)**: Set of commonly used skinless widgets, based on the **widget** module.
 
-### Application tier modules:
+### Auxiliary tier
 
 High-level components for assisting development, deployment, and logging.
 
-- **Asset management**
-- **CLI building tools**
-- **Diagnostic widgets**
-- **Google Analytics tools**
-- **Grunt tools**
-- **Material design widgets**
-- **Popup management**
-- **Test & build automation**
-- **Framework CLI**
+- **asset**: Manages application assets, both at build / deployment, as well as loading.
+- **cli-tools**: Implements classes for dealing with CLI arguments in a uniform way.
+- **diagnostic-widgets**: A set of skinned widgets providing insight to the developer about current application state.
+- **ga-tools**: Provides high-level API for connecting the application with [Google Analytics](https://www.google.com/analytics/).
+- **grunt-tools**: Provides high-level and uniform API for dealing with [Grunt](http://gruntjs.com/) tasks.
+- **material-widgets**: Adds off-the-shelf [Google Material Design]() widgets on top of **widgets** and **basic-widgets**.
+- **popup**: Adds off-the-shelf popup management for dealing with stacking and queueing.
+- **automation**: Introduces tools for automating visual regression testing.
+- **cli**: Essential command line tools for building Giant-based applications, initializing projects and application modules.
