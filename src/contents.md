@@ -1,5 +1,5 @@
-Developer Guide for Giant
-=========================
+Developer Guide
+===============
 
 Chapters
 --------
