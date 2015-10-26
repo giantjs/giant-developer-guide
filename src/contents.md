@@ -4,6 +4,6 @@ Developer Guide
 Chapters
 --------
 
-1. [Introduction](Introduction.md)
-2. [Terms](Terms.md)
-10. [Best Practices](BestPractices.md)
+1. [Introduction](introduction.md)
+2. [Terms](terms.md)
+10. [Best Practices](best-practices.md)
