@@ -4,9 +4,9 @@
 Introduction
 ============
 
-Giant is a full-featured framework for building complex, modern, snappy [single-page applications](https://en.wikipedia.org/wiki/Single-page_application) (SPAs). Giant targets large, enterprise-grade projects, ensuring maintainable, steady growth towards and beyond hundreds of thousands of lines of code.
+Giant is a full-featured, modular framework for building complex, modern Single-Page Applications. It targets multi-platform, enterprise-grade projects, stimulating unlimited, steady growth.
 
-Giant's modular structure allows for a great deal of flexibility, as any of its modules may be replaced with a functionally equivalent (set of) libraries. Or, individual modules of Giant may be used to fill the gaps in other frameworks. The purpose of Giant however, is to give developers a *single tool* with familiar practices and patterns recurring across modules, serving as a solid foundation to a *wide variety* of applications.
+The purpose of Giant is to give developers a *single, coherent system* with recurring practices and patterns, serving as a solid foundation to a *wide variety* of applications. At the same time, Giant's modular structure allows for a great deal of flexibility, as any of its modules may be replaced with a functionally equivalent (set of) libraries. Or, individual modules of Giant may be used to fill the gaps in other frameworks.
 
 Parts of Giant have been used in various projects since 2010. It's been revised, improved, and for some parts, redesigned multiple times, based on experience building actual, ambitious, large-scale applications. It's a framework which, despite being 'new', is past its maturation phase.
 
