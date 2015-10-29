@@ -6,7 +6,7 @@ OOP
 
 The module [`giant-oop`](https://github.com/giantjs/giant-oop) implements Giant's class system with utilities. Associated namespace: `$oop`.
 
-Giant is a strongly object oriented framework. The OO paradigm permeates all its modules: with very few exceptions, everything is a *class*, *trait*, or *interface*. Giant makes use the *prototypal* nature of JavaScript to build classes, however, it goes around the language's built-in *classical*, single inheritance pattern mostly associated with constructor functions and the `new` keyword. Giant introduces its own class system based on [prototypal inheritance](https://developer.mozilla.org/en/docs/Web/JavaScript/Inheritance_and_the_prototype_chain), which comes with powerful concepts and tools assisting the way classes are built, instantiated, and tested. These concepts include (quasi-) multiple inheritance, surrogates, memoization, reflection, and built-in mocks.
+Giant is a strongly object oriented framework. The OO paradigm permeates all of its components: with very few exceptions, everything is a *class*, *trait*, or *interface*. Giant makes use the *prototypal* nature of JavaScript to build classes, however, it goes around the language's built-in *classical*, single inheritance pattern mostly associated with constructor functions and the `new` keyword. Giant introduces its own class system based on [prototypal inheritance](https://developer.mozilla.org/en/docs/Web/JavaScript/Inheritance_and_the_prototype_chain), which comes with powerful concepts and tools assisting the way classes are built, instantiated, and tested. These concepts include (quasi-) multiple inheritance, surrogates, memoization, reflection, and built-in mocks.
 
 *ES6 classes*, which bring virtually no extra functionality, only syntax on top of their arguably inflexible ES5 counterparts, are considered an anti-pattern within Giant.
 
@@ -26,7 +26,9 @@ Most modern IDEs and code quality tools will point out problems related to priva
 `$oop.Base`
 -----------
 
-`Base` is the base class of all classes throughout Giant modules, as well as the modules of the application. It introduces a set of basic methods with which any class, much like a crane, builds itself. Methods that have to do with adding properties / methods are grouped by visibility: `.addMethods()`, `.addPrivateConstants()`, etc. Check the API reference for specific methods.
+`Base` is the base class of all classes throughout Giant modules, as well as the modules of the application. It introduces a set of basic methods with which any class, much like a crane, builds itself. Methods that have to do with adding properties / methods are grouped by visibility: `.addMethods()`, `.addPrivateConstants()`, etc.
+ 
+~~Check the API reference for specific methods.~~
 
 Single inheritance
 ------------------
@@ -34,8 +36,6 @@ Single inheritance
 Single inheritance, in a prototypal model, does nothing more than add a blank prototype level (through `Object.create()`) to host properties that will define the extended class.
 
 Giant implements single inheritance through the `.extend()` method.
-
-Methods in the host class that override those of the base, must call their super methods explicitly.
 
 ![Single Inheritance](https://raw.githubusercontent.com/giantjs/giant-developer-guide/master/images/Single%20Inheritance.png)
 
@@ -55,8 +55,6 @@ Giant facilitates multiple inheritance by introducing *traits*.
 
 Giant implements trait addition through `.addTrait(trait)` and `.addTraitAndExtend(trait)` methods. While the former merely mixes the properties of the specified trait to the host (except for `.init`), the latter calls an `.extend()` afterwards, as traits might implement the same methods as the base or the host, and extending is the only way to avoid collision.
 
-Methods in the host class that override those of the base, must call their super methods **as well as** the trait's implementation (if any).
-
 ![Multiple Inheritance](https://raw.githubusercontent.com/giantjs/giant-developer-guide/master/images/Multiple%20Inheritance.png)
 
 ### Example
@@ -69,7 +67,9 @@ Methods in the host class that override those of the base, must call their super
 Adding properties & methods
 ---------------------------
 
-...
+The base class `$oop.Base` implements the methods for classes to build their APIs, by adding properties and methods of different levels of visibility. ~~Check API for specific property addition methods.~~
+
+Each non-static class must have an `.init()` method, which receives the constructor arguments.
 
 It is very important not to override class-building methods.
 
@@ -84,6 +84,13 @@ In this example we're adding a static string property (`foo`), and a public meth
         .addMethods({
             baz: function (quux) {}
         });        
+
+Overriding methods
+------------------
+
+Methods in the host class that override those of the base, must call their super methods explicitly.
+
+Methods in the host class that override those of the base, must call their super methods **as well as** the trait's implementation (if any).
         
 Instantiation
 -------------
