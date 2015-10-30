@@ -6,7 +6,7 @@ OOP
 
 The module [`giant-oop`](https://github.com/giantjs/giant-oop) implements Giant's class system with utilities. Associated namespace: `$oop`.
 
-Giant is a strongly object oriented framework. The OO paradigm permeates all of its components: with very few exceptions, everything is a *class*, *trait*, or *interface*. Giant makes use the *prototypal* nature of JavaScript to build classes, however, it goes around the language's built-in *classical*, single inheritance pattern mostly associated with constructor functions and the `new` keyword. Giant introduces its own class system based on [prototypal inheritance](https://developer.mozilla.org/en/docs/Web/JavaScript/Inheritance_and_the_prototype_chain), which comes with powerful concepts and tools assisting the way classes are built, instantiated, and tested. These concepts include (quasi-) multiple inheritance, surrogates, memoization, reflection, and built-in mocks.
+Giant is a strongly object oriented framework. The OO paradigm permeates all of its components: with very few exceptions, everything is a *class*, *trait*, or *interface*. Giant makes use the *prototypal* nature of JavaScript to build classes, however, it goes around the language's built-in *classical*, single inheritance pattern mostly associated with constructor functions and the `new` keyword. Giant introduces its own class system based on [prototypal inheritance](https://developer.mozilla.org/en/docs/Web/JavaScript/Inheritance_and_the_prototype_chain), which comes with powerful concepts and tools assisting the way classes are built, instantiated, and tested. These concepts include (quasi-) multiple inheritance, surrogates, memoization, and built-in mocks.
 
 *ES6 classes*, which bring virtually no extra functionality, only syntax on top of their arguably inflexible ES5 counterparts, are considered an anti-pattern within Giant.
 
@@ -300,7 +300,7 @@ Both wrappers are methods on `$oop.Base`, but they're used differently depending
 ```js
 fido.isA(Dog); // true
 fido.isA(Cat); // false
-rover.isA(Dog); // throws error, saying 'rover' is undefined
+rover.isA(Dog); // throws error ('rover' is undefined)
 ```
 
 The second wrapper, `.isBaseOf()`, is safer to use when we're checking variables that might be undefined.
@@ -308,7 +308,7 @@ The second wrapper, `.isBaseOf()`, is safer to use when we're checking variables
 ```js
 Dog.isBaseOf(fido); // true
 Cat.isBaseOf(fido); // false
-Dog.isBaseOf(rover); // false, though 'rover' is still undefined
+Dog.isBaseOf(rover); // false ('rover' still undefined)
 ```
 
 Built-in mocks
@@ -334,7 +334,7 @@ var Dog = $oop.Base.create()
     .addMethods({
         init: function () {},
         bark: function () {
-            alert("Woof!);
+            alert("Woof!");
         }
     });
     
@@ -356,17 +356,85 @@ Dog.removeMocks();
 Utilities
 ---------
 
+Besides the class system, Giant's OOP layer introduces a couple of utilities which assist in the creation, use, and maintenance of classes.
+
 ### Postponed definitions
+
+In any complex codebase, dealing with dependencies is a major concern. In most cases, this means:
+
+- attempting to access something that is not loaded (interpreted) yet
+- circular dependencies
+
+Giant offers *postponed definitions* to get ahead of such problems. With postponed definitions, all symbols start out as getter-setters, instead of the actual variable (class, function, object, etc.) we want to assign to it. These getter-setters will get resolved to their actual value at the first time they're being accessed. 
+
+```js
+$oop.postpone(window, 'Dog', function () {
+    window.Dog = $oop.Base.extend();
+});
+```
+
+Postponed definitions may be amended. This is usually necessary when changing something retrospectively, but the referenced variable might not exist yet, or we don't want to resolve the symbol prematurely.
+
+Typical use case: adding surrogates.
+
+```js
+$oop.postpone(window, 'Chihuahua', function () {
+    window.Dog = Dog.extend();
+});
+
+$oop.amendPostponed(window, 'Dog', function () {
+    window.Dog.addSurrogate(window, 'Chihuahua',
+        function (name, breed) {
+            return breed === 'chihuahua';
+        });
+});
+```
+
+Check [Best practices](./best-practices.md#no-instantiation-in-postponed-amendPostponed) for more on using postponed definitions.
 
 ### Extending built-ins
 
+Extending (or augmenting) built-in JavaScript objects, such as `Array`, `String`, or `Date`, are [generally perceived](https://google.github.io/styleguide/javascriptguide.xml?showone=Modifying_prototypes_of_builtin_objects#Modifying_prototypes_of_builtin_objects) as bad design.
+
+The same applies to Giant, with the exception of conversion methods, which create a Giant-based class instance passing it the array or string appropriately as its constructor argument.
+
+To add conversion methods to built-in objects, use `$oop.extendBuiltIn()`. Only method names that start with "to", will be allowed, otherwise an exception is thrown.
+
+Applying this to our `Dog` class introduced above, but using only the `name` argument:
+
+```js
+$oop.extendBuiltIn(String.prototype, {
+    toDog: function () {
+        return Dog.create(this.valueOf());
+    }
+});
+
+var fido = 'fido'.toDog(); // gets a Dog instance
+```
+
 ### Adding module-global properties
+
+When working with postponed definitions, special attention must be paid to constants. We might want to use constants *inside* a postponed block, but what if the constant is defined on a class that sits inside another postponed block? In most cases it's not a good idea to resolve an entire class just to get a constant, especially when that constant is not *closely* related to the class itself, eg. event names.
+
+In these cases, the constants are to be placed on the (module) namespace directly through `$oop.addGlobalConstants()`.
+
+Currently `.addGlobalConstants()` adds constants to the `$oop` namespace. To add constants to other namespaces, call it with `.call()`. This will be changed in the next release.
+
+```js
+var $namespace = {};
+
+$oop.addGlobalConstants.call($namespace, {
+    EVENT_BARK: 'dog.bark'
+});
+```
+
+It's important that constants applied this way be primitives, or at least not instances of any Giant class, due to the same postponed resolution concerns.
 
 Configuration
 -------------
 
-$oop.privatePrefix
+The Giant OOP module introduces a few flags and variables to tweak its behavior. 
 
-$oop.messy
-
-$oop.testing
+- `$oop.privatePrefix`: Sets the string prefix to be used for marking private properties. Defaults to `'_'`.
+- `$oop.messy`: When true, skips ES5 property attributes when adding properties of various visibility levels. Defaults to `false`.
+- `$oop.testing`: When true, `$oop.Base.extend()` will introduce two new prototype levels instead of one, placing methods on the lower level, and properties on the higher level. Defaults to `false`.
