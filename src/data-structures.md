@@ -55,8 +55,23 @@ Giant implements a number of `Hash`-based structures in order to cover most tran
 - **Chain**: Implements chain structure, where inserting / removing items is cheap but locating them is expensive.
 - **Tree**: Implements tree manipulation and querying for matching keys, values, paths, and their combinations. More about trees below.
 
-Tree
-----
+Filtering collections
+---------------------
+
+Mapping collections
+-------------------
+
+Creating specified collections
+------------------------------
+
+Combining dictionaries
+----------------------
+
+Reversing a dictionary
+----------------------
+
+Manipulating trees
+------------------
 
 The most powerful among fundamental data structures is the tree. It allows the user to manipulate and query deep object structures. Trees are generally used for temporary storage throughout the application to implement datastores, lookups, and indexes. Among others, it is the basis for the evented [~~Entity framework~~](entities.md). 
 
@@ -90,8 +105,6 @@ var schedule = $data.Tree.create({
 });
 ```
 
-### Paths
-
 In a `Tree`, each node is uniquely identified with a path, composed of the keys associated with all its parent nodes all the way up to the root. For instance, The value `"CEO"` in our example could be accessed as `schedule.items.Tuesday["11:00"]`. The part with "Tuesday.11:00" is the path relative to the root of the tree. While accessing nodes like this works when the data is there, it fails with an exception thrown when we try to access a node that's not there, eg. `schedule.items.Saturday["9:00"]`. To this end, Giant introduces its own way of accessing nodes and managing paths, one which does not fail in similar circumstances.
 
 Paths in Giant are instances of the `Path` class, which provides methods for manipulating the path. The path above would look like this:
@@ -120,7 +133,8 @@ Paths may also be used in addressing a node for change. For instance, the follow
 schedule.getNode('Tuesday>11:00'.toPath(), "CTO");
 ```
 
-### Queries
+Querying trees
+--------------
 
 Getting & setting single nodes is usually enough to manipulate a tree, but to work with the data inside, we need to traverse the tree and collect nodes that satisfy a given set of conditions. In Giant, those conditions are expressed by queries.
 
