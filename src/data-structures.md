@@ -58,6 +58,10 @@ Giant implements a number of `Hash`-based structures in order to cover most tran
 Filtering collections
 ---------------------
 
+Filtering is one of the most frequent operations performed on collections. Filtering iterates over the collection's items and returns a new `Collection` instance (actually an instance of the class of the original collection) with key-value pairs from the original collection satisfying the given predicate.
+ 
+Giant implements different filtering methods on `Collection` for different filtering bases.
+
 Mapping collections
 -------------------
 
