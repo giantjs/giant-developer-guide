@@ -4,7 +4,7 @@
 Data Structures
 ===============
 
-| Package | Namespace |
+| Module | Namespace |
 |:--------|:----------|
 | `npm install giant-data` | `$data` |
 
