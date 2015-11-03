@@ -1,6 +1,21 @@
 <!-- @@@page:manual@@@ -->
 
 1. [Introduction](introduction.md)
-2. [OOP](oop.md)
-3. [Data Structures](data-structures.md)
-10. [Best Practices](best-practices.md)
+2. ~~Getting Started~~
+3. ~~Using the CLI~~
+4. ~~Coding Guide~~
+5. ~~Assertions~~
+6. [OOP](oop.md)
+7. ~~Utils & Async~~
+8. [Data Structures](data-structures.md)
+9. ~~Universal Events~~
+10. ~~Templating~~
+11. ~~Indexed Tables~~
+12. ~~Entities~~
+13. ~~I18n~~
+14. ~~Routing~~
+15. ~~API Access~~
+16. ~~Widgets~~
+17. ~~Asset Mgmt~~
+17. ~~Session Mgmt~~
+18. [Best Practices](best-practices.md)
