@@ -11,7 +11,7 @@
 9. ~~Universal Events~~
 10. ~~Templating~~
 11. ~~Indexed Tables~~
-12. ~~Entities~~
+12. [Entities](entities.md)
 13. ~~I18n~~
 14. ~~Routing~~
 15. ~~API Access~~
