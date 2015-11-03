@@ -13,7 +13,11 @@ Higher-level modules in Giant do considerable data transformations mostly for ma
 `$data.Hash`
 ------------
 
-The base class for any component that stores and processes complex data is `$data.Hash`. The purpose of `Hash` is serve as a common denominator for converting more specific data structures based on it to each other. Through `Hash` we're able to convert a `Collection` into a `Dictionary`, `Dictionary` to `Tree`, and so on, as long as they share the same base class, `Hash`.
+The base class for any component that stores and processes complex data is `$data.Hash`.
+
+> The purpose of `Hash` is serve as the lowest common denominator for converting more specific data structures based on it to each other.
+ 
+Through `Hash` we're able to convert a `Collection` into a `Dictionary`, `Dictionary` to `Tree`, and so on, as long as they share the same base class, `Hash`.
 
 Internally, `Hash` maintains the buffer for the data being operated on, (`items`, which is either an `Object` or `Array`) and implements very generic methods for manipulating the hash, including clearing, cloning, low-level data access, etc.
 
@@ -58,21 +62,187 @@ Giant implements a number of `Hash`-based structures in order to cover most tran
 Filtering collections
 ---------------------
 
-Filtering is one of the most frequent operations performed on collections. Filtering iterates over the collection's items and returns a new `Collection` instance (actually an instance of the class of the original collection) with key-value pairs from the original collection satisfying the given predicate.
+Filtering iterates over the collection's items and returns a new `Collection` instance (actually an instance of the class of the original collection) with key-value pairs from the original collection satisfying a given predicate.
  
 Giant implements different filtering methods on `Collection` for different filtering bases.
+
+- By listing a number of keys (`.filterByKeys()`): retrieves items where there's an exact key match. This is rather restrictive, but is very fast, *< O(n)* complexity.
+- By key prefix (`.filterByPrefix()`): retrieves items where the key matches the prefix. *O(n)* complexity.
+- By regular expression (`.filterByRegExp()`): retrieves items where the key matches the regular expression. *O(n)* complexity.
+- By custom filter function (`.filterBySelector()`): retrieves items where the function returns true for the key-value pair. *O(n)* complexity.
+
+### Example
+
+```js
+var pets = $data.Collection.create({
+        "Fido": "dog",
+        "Buddy": "dog",
+        "Rover": "dog",
+        "Fluffy": "cat"
+    });
+    
+pets.filterByPrefix("F")
+    .items;
+```
+
+Will return:
+
+```json
+{
+    "Fido": "dog",
+    "Fluffy": "cat"
+}
+```
 
 Mapping collections
 -------------------
 
-Creating specified collections
-------------------------------
+Mapping generally returns a new collection with a copy of the original with the keys or values replaced according to the specified callback, which takes both value and key as arguments.
+
+Value mapping is very similar to `Array.prototype.map` except it works on object-based collections, not just arrays.
+
+```js
+var sounds = {"dog":"woof", "cat":"meow"};
+pets.mapValues(function (species, name) {
+    return sounds[species];
+})
+.items
+
+/*
+{
+    "Fido": "woof",
+    "Buddy": "woof",
+    "Rover": "woof",
+    "Fluffy": "meow"
+}
+*/
+```
+
+Mapping keys is a bit different, due to its [non-injective](https://en.wikipedia.org/wiki/Bijection,_injection_and_surjection) nature. It will only include one of the key-value pairs where the mapping resolves to the same key. This means that conflicts must be resolved (using an extra conflict resolution callback) so we remain in control of what ends up being the new value. Key mapping may be used to **eliminate duplicate entries** or detect groups.
+
+Using the `pets` collection,
+
+```js
+pets.mapKeys(function (species, name) {
+    return species;
+})
+.getKeys()
+
+// ["dog", "cat"]
+```
+
+Both value and key mapping allows to specify a `Collection` subclass on which the mapped collection will be based. If not specified, the result will be of the same collection class as the original.
+
+Specified collections
+---------------------
+
+To deal with collections of items of the same type (class), Giant introduces the concept of *specified collections*, which allows us to merge the APIs of `Collection` and the item.
+
+`Collection.of()` accepts Giant classes, constructor functions, and objects that have method names as keys. Methods specified by the argument class / constructor / object must be present on all items, as batch calls are issued without checking the method's presence (for performance considerations).
+
+For example, if we want to perform batch operations on a number of strings in a concise manner, we only need to create a specified collection as follows:
+
+```js
+var StringCollection = $data.Collection.of(String);
+```
+
+And use the `String` API with it as usual.
+
+```js
+StringCollection.create(['Fido', 'Buddy', 'Rover'])
+    .slice(1)
+    .items;
+    
+// ['ido', 'uddy', 'over']
+```
+
+Which by the way is equivalent to:
+
+```js
+StringCollection.create(['Fido', 'Buddy', 'Rover'])
+    .callOnEachItem('slice', 1)
+    .items;
+```
+
+Item methods on a specified collection might return two kinds of values:
+
+- The original collection instance, if the method on all items have returned themselves. In other words, if the item method is chainable, the aggregate method will be chainable, too.
+- A collection of the return values for each item. Does not preserve the original collection's class, but does preserve the buffer type. (object vs. array)
 
 Combining dictionaries
 ----------------------
 
+Dictionaries implement [surjective](https://en.wikipedia.org/wiki/Bijection,_injection_and_surjection) associations between values. If the output set of dictionary A is either subset or superset of the input set of dictionary B, then there is a dictionary C, the input of which is the input of A, and the output of which is the ouput set of B.
+
+> Think of dictionary combination as a left join in SQL.
+
+In order to combine dictionaries, we must use `StringDictionary` for the left-hand operand, as its values also serve as keys in the right-hand operand. (This will not apply in ES6, where keys may be other than strings.)
+
+Let's re-create the pet - sound associations a bit differently this time, remaining withing the realms of dictionaries. We start with two instances: `pets` and `sounds`.
+
+```js
+var pets = $data.StringDictionary.create({
+        "Fido": "dog",
+        "Buddy": "dog",
+        "Rover": "dog",
+        "Fluffy": "cat"
+    }),
+    sounds = $data.StringDictionary.create({
+        dog: "woof",
+        cat: "meow"
+    });    
+```
+
+Now if we re-factor the mapping above to use `StringDictionary.combineWith()`:
+
+```js
+pets.combineWith(sounds).items
+
+/*
+{
+    "Fido": "woof",
+    "Buddy": "woof",
+    "Rover": "woof",
+    "Fluffy": "meow"
+}
+*/
+```
+
+For dictionaries with identical sets for input and output, `StringDictionary` implements `.combineWithSelf()`, to obtain higher-level connections between the elements of that set.
+
 Reversing a dictionary
 ----------------------
+
+Since dictionaries allow multiple values to be associated with a key, the direction of the association is reversible. Moreover, if we reverse a reversed dictionary, we expect to get back the original.
+
+```js
+var pets = $data.StringDictionary.create({
+    dog: ['Fido', 'Buddy', 'Rover'],
+    cat: 'Fluffy'
+});
+
+pets.reverse().items
+
+/*
+{
+    "Fido": "woof",
+    "Buddy": "woof",
+    "Rover": "woof",
+    "Fluffy": "meow"
+}
+*/
+
+pets.reverse().reverse().items
+
+/*
+{
+    dog: ['Fido', 'Buddy', 'Rover'],
+    cat: 'Fluffy'
+}
+*/
+```
+
+> Reversing dictionaries is a convenient way of grouping values.
 
 Manipulating trees
 ------------------
