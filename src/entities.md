@@ -19,6 +19,8 @@ In Giant, the fundamental entity is the *document*. Documents are semantically a
 
 *Items*, for convenience reasons, are interchangeable with singular fields, and therefore share the same structure: a value, which in this case cannot contain further items, and other attributes.
 
+![Document Structure](https://raw.githubusercontent.com/giantjs/giant-developer-guide/master/images/Document%20Structure.png)
+
 > Each entity is identified by an associated *key*.
 
 The key contains sufficient information to identify an entity.
