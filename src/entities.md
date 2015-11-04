@@ -15,9 +15,9 @@ Documents, fields, items
 
 In Giant, the fundamental entity is the *document*. Documents are semantically atomic representations of real-world entities, such as users, sessions, addresses, campaigns, etc. Documents, and in fact all entities within Giant might have their own internal structure made up of more specific entities. The difference is, that while any entity can be the owner of attribute entities, only documents might have fields.
 
-Fields, which represent single properties of documents, might only have a value entity besides its attributes. Based on the field's type, which may be singular (default), or collection, the value might itself have an entity structure of collection items.
+*Fields*, which represent single properties of documents, might only have a value entity besides its attributes. Based on the field's type, which may be singular (default), or collection, the value might itself have an entity structure of collection items.
 
-Items, for convenience reasons, are interchangeable with singular fields, and therefore share the same structure: a value, which in this case cannot contain further items, and other attributes.
+*Items*, for convenience reasons, are interchangeable with singular fields, and therefore share the same structure: a value, which in this case cannot contain further items, and other attributes.
 
 > Each entity is identified by an associated *key*.
 
@@ -69,13 +69,126 @@ The following examples creates a keys & entities in various ways. Always use the
 'user/1/emails/home'.toItemKey().getFieldKey()
 ```
 
+Entity storage
+--------------
+
+Data associated with entities resides in a central datastore, composed of three containers, each being an instance of `$data.Tree`.
+
+### Entities
+
+Entity data is stored in `$entity.entities`, in the semi-structured manner that is expected from a document-oriented database. Documents are grouped by type, and include their fields, and collection items. Note that document types are not collections themselves, as they are in MongoDB for instance. You can't access all documents of a certain type through the entity API, although it is possible to do on a lower level. For this reason, groups of documents must always be referenced from a field on a document that we already have access to.
+
+```json
+{
+    "user": {
+        "1": {
+            "firstName": "John",
+            "lastname": "Smith",
+            "emails": {
+                "home": "john.smith@homeemail.com",
+                "office": "john.smith@officeemail.com"
+            },
+            "organization": "organization/1"
+        }
+    },
+    "organization": {
+        "1": {
+            "name": "Smithcorp, Inc."
+        }
+    }
+}
+```
+
+### Metadata
+
+Descriptive information *about* documents, fields, and items are kept in `$entity.config`, in the same document structure as `$entity.entities`. Currently it's mainly reserved for specifying types of fields, item IDs, and item values. Giant's entity system uses these settings to decide how to process fields.
+
+```json
+{
+    "field": {
+        "user/firstName": { "fieldType": "string" },
+        "user/lastName": { "fieldType": "string" },
+        "user/emails": {
+            "fieldType": "collection",
+            "itemType": "string"
+        }
+    }
+}
+```
+
+We see 3 documents above, describing 3 fields in the current schema. The documents' type is "field", their IDs are respectively "user/firstName", "user/lastName", and "user/emails".
+
+> When you define your own schema, make sure you append to the config container's "field" node, using `.appendNode()`, to avoid overwriting existing metadata.
+
+Like this:
+
+```js
+$entity.config.appendNode('field'.toPath(), {
+    "user/organization": { fieldType: "reference" },
+    "organization/name": { fieldType: "string" }
+});
+```
+
+The `reference` type may be assigned to `fieldType`, `itemType`, as well as `itemIdType`. It tells the entity system to treat this field as a reference to another document. 
+
+### Index
+
+What makes an application really *data-driven*, is the ability to query and process entities, and do it fast. To that end, Giant maintains an index container: `$entity.index`. It usually starts out blank, unless there's some index data that is not attainable from the API.
+
+> It's the responsibility of the application to maintain indexes.
+
+A typical start-of-word search index would look like this:
+
+```js
+{
+    "full-text": {
+        "j": {
+            "o": {
+                "h": {
+                    "n": {
+                        "references": {
+                            "user/1": "user/1"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+Using this index and a simple `Query` we can find documents associated with indexed strings that start with "jo":
+
+```js
+var query = 'full-text>j>o>\\>references>|'.toQuery();
+$entity.index.queryValues(query);
+// ["user/1"]
+```
+
+### Management
+
+The `config` container requires little management. Usually, it is set up once, based on static, hard-coded data, and remains that way throughout the application's entire life cycle.
+
+Managing The `entities` container is a bit more complex, as there's a good chance we want to reset its contents occasionally, either to clean up sensitive, user-related data on logout, or just to conserve memory.
+
+> When resetting any of the containers, we must make sure to restore the initial content.
+
+The entities container is updated either by a merge process, which integrates (after possibly transforming) API responses into the application state, or, directly via entity API, depending on whether the application implements ~~lazy API calls~~.
+
+The most complex management is required by `$entity.index`. Not only does it need to be reset from time to time, but its contents require constant attention to remain in sync with the entities being indexed.
+
+Usually, an index is managed by a single class. This class must take care of 
+
+1. **initialization**, by setting up the initial structure on first access,
+2. **event subscription**, to get notifications of relevant entity changes,
+3. **synchronisation**, by modifying index data according to entity changes carried by subscribed events
+
+In maintaining an index the data flow is always uni-directional. Modifying an index does not trigger any events.
+
 Entity access & manipulation
 ----------------------------
 
 ### Resolving references
-
-The entity store
-----------------
 
 Entity events
 -------------
