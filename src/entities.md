@@ -190,6 +190,19 @@ In maintaining an index the data flow is always uni-directional. Modifying an in
 Entity access & manipulation
 ----------------------------
 
+Now that we can create keys and entity instances, and know where entities are being stored, it's time to connect the two concepts.
+
+Among the many responsibilities of a key instance is to resolve the information that it stores and identifies an entity, to a specific path in the `entities` container. For this purpose, every key class implements a `getEntityPath` method, returning a `$data.Path` instance. The mapping between keys and entity paths must be [bijective](https://en.wikipedia.org/wiki/Bijection), however, paths are never actually resolved to keys, because paths lack structure and hence the additional information that would be required to tell what kind of entity it represents.
+
+```js
+'user/1/firstName'.toFieldKey().getEntityPath().toString()
+// document>user>1>firstName
+```
+
+Through the above example key strings and path string look very similar, however this would change with the introduction of entity attributes.
+
+Entity instances can get and set entity nodes relying on the path information obtained from the associated key (`.entityKey`). To get the entity node, one would have to call `.getNode()` on it, to set it, `.setNode()` respectively. So far the entity API seems to resembles that of `$data.Tree`, except here we're not passing any path information. The same similarity may be observed at node removal, as `.unsetNode()` and `.unsetKey()` are both implemented on `Entity`, too.
+
 ### Resolving references
 
 Entity events
