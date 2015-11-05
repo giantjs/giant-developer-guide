@@ -304,16 +304,56 @@ schedule.getNode('Saturday>9:00'.toPath()); // undefined
 Paths may also be used in addressing a node for change. For instance, the following expression changes "CEO" to "CTO" in our `schedule` tree.
 
 ```js
-schedule.getNode('Tuesday>11:00'.toPath(), "CTO");
+schedule.setNode('Tuesday>11:00'.toPath(), "CTO");
 ```
 
 Getting and setting nodes is quite straightforward, but as far as their removal is concerned, there are multiple options.
 
 The simplest and fastest way to remove a node from a tree is `.unsetNode()`. It's essentially the same as `.setNode(undefined)`, except that when the path does not exist, it won't be created. Otherwise it's just replaces the current node value with `undefined`. The associated key in the parent node, and therefore the path will not change.
 
+```js
+schedule.unsetNode('Tuesday>11:00'.toPath()).items
+/*
+...
+"Tuesday": {
+    "8:45": "huddle",
+    "11:00": undefined
+}
+...
+*/
+```
+
 If the goal is to also remove the key from the parent, things get a bit more complicated. Removing the key potentially changes the parent, so `.unsetKey()` accepts a callback that will be called after successful removal.
 
+```js
+schedule.unsetKey('Tuesday>11:00'.toPath()).items
+/*
+...
+"Tuesday": {
+    "8:45": "huddle"
+}
+...
+*/
+```
+
 There's a third option, `.unsetPath()`, that prunes the path after removing the key, leaving the first key on the path with a non-singular object as value. (Singular objects have a single key-value pair.)
+
+```js
+schedule.unsetPath('Wednesday>9:00'.toPath()).items
+/*
+...
+"Tuesday": { 
+    "8:45": "huddle", 
+    "11:00": "CEO"
+},
+"Thursday": {
+    "9:00": "huddle",
+    "9:30": "planning",
+    "16:30": "Sarah"
+},
+...
+*/
+```
 
 Querying trees
 --------------
