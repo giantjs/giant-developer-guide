@@ -201,12 +201,74 @@ Among the many responsibilities of a key instance is to resolve the information 
 
 Through the above example key strings and path string look very similar, however this would change with the introduction of entity attributes.
 
-Entity instances can get and set entity nodes relying on the path information obtained from the associated key (`.entityKey`). To get the entity node, one would have to call `.getNode()` on it, to set it, `.setNode()` respectively. So far the entity API seems to resembles that of `$data.Tree`, except here we're not passing any path information. The same similarity may be observed at node removal, as `.unsetNode()` and `.unsetKey()` are both implemented on `Entity`, too.
+Entity instances can get and set entity nodes relying on the path information obtained from the associated key (`.entityKey`). To get the entity node, one would have to call `.getNode()` on it, to set it, `.setNode()` respectively. So far the entity API seems to resemble that of `$data.Tree`, except here we're not passing any path information. The same similarity may be observed for node removal, as `.unsetNode()` and `.unsetKey()` are both implemented on `Entity`, too.
+
+### Fields and items
+
+While `.setNode()` is the standard way of setting entity data on all entity classes, `Field` (and its subclass `Item`) implements the `.setValue()` shorthand to set the node on its special, 'value' attribute, which, by default, is equivalent to the field or item itself.
+
+> For forward compatibility reasons it's always safer to use `Field.setValue()` and `Item.setValue()` to set the values of fields and items.
+
+The expression `'user/1/firstName'.toField().setNode("Robert")` might have a very different effect than `'user/1/firstName'.toField().setValue("Robert")` if the field has other attributes.
 
 ### Resolving references
 
+A central problem when working with entities, especially if the data is coming from a REST API, is resolving references.
+
+> Having a key to an entity does not mean having the entity data, too.
+
+Resolving a key to actual data usually leads through three steps, managed by a different component, eg. Giant's ~~API Access~~ layer.
+ 
+1. Resolving the key to an API resource or endpoint
+2. Invoking the endpoint and fetching response
+3. Merging response into entity container
+
+Only when these three steps have succeeded can we attempt again to access the data associated with our key.
+
+> When resolving references, the application must always be prepared to handle the no-data case.
+
 Entity events
 -------------
+
+Entity manipulation triggers events in the event space `$entity.entityEventSpace`. Attempting to access an absent node triggers `$entity.EVENT_ENTITY_ACCESS`, changing a node triggers `$entity.EVENT_ENTITY_CHANGE`. All events are triggered on the entity path prepended with 'entity', serving as root path for all entity events.
+
+The following example logs all entity changes, including the affected key, the before, and after values. 
+
+```js
+$entity.entityEventSpace
+    .subscribeTo(
+        'entity'.toPath(), // subscribing at root
+        $entity.EVENT_ENTITY_CHANGE, // to changes
+        function (event) {
+            console.log(
+                "entity changed:",
+                 entity.sender.toString(), 
+                 event.beforeNode,
+                 eventafterNode);
+        });
+```
+
+The event's `sender` for entity events holds the associated entity key.
+
+With the above event subscription in place, here's what we'd get for updating a single field:
+
+```js
+'user/2/firstName'.toField().setValue("Jen");
+// entity changed: user/2/firstName undefined Jen
+```
+
+Setting the same value again would not trigger another event.
+
+As entity keys are evented, one may subscribe to entity events on keys, too:
+
+```js
+'user/2/firstName'.toFieldKey()
+    .subscribeTo(
+        $entity.EVENT_ENTITY_CHANGE,
+        function () {
+            console.log("entity changed");
+        });
+```
 
 Data binding
 ------------
