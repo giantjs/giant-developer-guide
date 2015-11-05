@@ -244,11 +244,11 @@ $entity.entityEventSpace
                 "entity changed:",
                  entity.sender.toString(), 
                  event.beforeNode,
-                 eventafterNode);
+                 event.afterNode);
         });
 ```
 
-The event's `sender` for entity events holds the associated entity key.
+The event's `sender` for entity events holds the associated entity key. Event instance properties `beforeNode` and `afterNode` are specific to entity change events, implemented by the `EntityChangeEvent` class. 
 
 With the above event subscription in place, here's what we'd get for updating a single field:
 
@@ -272,6 +272,55 @@ As entity keys are evented, one may subscribe to entity events on keys, too:
 
 Data binding
 ------------
+
+Binding manages event subscriptions for class instances. It maintains a registry of event handlers relevant to the *bound* instance, indexed by event names, method names, and in the case of entities, entity keys. Binding offers considerable flexibility over the regular event subscription API, in that it allows handler functions to be wrapped, potentially adding extra functionality on top of the actual handler methods.
+
+In the context of entities, binding endows application components to react to entity changes. There are three different kinds of data binding in Giant:
+ 
+- **Simple replacement binding**, which gets triggered only when the observed entity node gets replaced: `.bindToEntityChange()`,
+- **Content binding**, which detects any change within the observed node: `.bindToEntityContentChange()`,
+- And **delegated binding**, where changes are captured on nodes being closer to the root of the observed path, but are treated as if they occurred right there: `.bindToDelegatedEntityChange()`.
+
+> Data binding in Giant is agnostic about how entity data gets updated, and has nothing to do with API access.
+
+Classes must have the `$entity.EntityBound` trait in order to be data-bound. This trait provides the binding API, and maintains the bindings.
+
+The following example illustrates delegated binding. The first change only changes Fido's 'hungry' field from `false` to `true`. The second change overwrites the entire Fido document with the property 'hungry' set to `false`.
+
+```js
+var HungryDog = $oop.Base.extend()
+    .addTrait($entity.EntityBound)
+    .addMethods({
+        init: function (dogKey) {
+            $entity.EntityBound.init.call(this);
+            this.bindToDelegatedEntityChange(
+                dogKey.getFieldKey('hungry'), 
+                'onHungryChange');
+        },
+        
+        onHungryChange: function (event) {
+            var dogKey = event.sender,
+                isHungry = event.afterNode,
+                dogId = dogKey.documentId;
+            if (isHungry) {
+                console.log("feed", dogId, "!");
+            } else {
+                console.log(dogId, "is kinda full");
+            }
+        }
+    });
+    
+var fidoKey = 'dog/fido'.toDocumentKey(),
+    hungryDog = HungryDog.create(fidoKey);
+
+'dog/fido/hungry'.toField().setValue(true);
+// feed fido !
+
+'dog/fido'.toDocument().setNode({ hungry: false });
+// fido is kinda full
+
+hungryDog.unbindAll();
+```
 
 Custom `Document` classes
 -------------------------
