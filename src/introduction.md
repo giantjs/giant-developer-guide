@@ -68,3 +68,72 @@ High-level components for assisting development, deployment, and logging.
 - **popup**: Adds off-the-shelf popup management for dealing with stacking and queueing.
 - **automation**: Introduces tools for automating visual regression testing.
 - **cli**: Essential command line tools for building Giant-based applications, initializing projects and application modules.
+
+Application architecture
+------------------------
+
+The typical Giant-based application is made up of a handful of high-level components. Each component serves a specific purpose, and is based on one or more of the framework modules.
+
+In the figure below, each block represents one such component, using and listening in on connected components.
+
+![Architecture](https://raw.githubusercontent.com/giantjs/giant-developer-guide/master/images/Architecture.png)
+
+### General
+
+Serves the entire front end stack. Based on *essentials-tier* modules, such as `giant-assertion`, `giant-oop`, `giant-utils`, `giant-data`, `giant-events`, and `giant-templating`, as well as application-domain general utilities.
+
+### Transport
+
+Communicates with the server. Based on `giant-ajax` and parts of `giant-rest`. Controls and listens to the browser's `XMLHttpRequest` object.
+
+### Model
+
+Manages the application's data layer. Based on `giant-entity`, parts of `giant-rest` and optionally `giant-table`.
+
+- Provides access and manipulation to entities
+- Maintains lookups and indexes
+- Listens to whether any data is required from the server
+- Integrates server responses into the entity store, and through it, the rest of the application state
+- Notifies relevant components of entity changes
+
+Controls and listens to the 'transport' component.
+
+### Widgets
+
+Making up most of an application's codebase, this component is where UI logic is implemented. In an MVC approach, the 'widgets' component is equivalent to the view-controller. Based on `giant-widget`, `giant-basic-widgets`, and other widget modules.
+
+- Generates and injects markup into the DOM, based on current application state
+- Synchronizes the UI state and DOM to other application components, primarily the model 
+
+Controls and listens to the DOM, 'model', 'session', 'i18n', 'routing', and 'general' components. It is not allowed to access the 'transport' component directly though.
+
+### Session
+
+Manages the authenticated user. Based on `giant-session`.
+
+- Handles user authentication
+- Maintains & persists session information
+- Notifies relevant components of session-related changes
+
+Controls and listens to the 'model' and 'transport' modules, and is being controlled by the 'widgets' component.
+
+### Internationalization
+
+Manages locales and translated text. Based on `giant-i18n`.
+
+- Maintains current locale
+- Provides API to accessing text according to current locale
+- Merges translations and other locale information into the model
+- Notifies relevant components of locale-related changes
+
+Controls and listens to the 'model' component, is being controlled by 'widgets'. 
+
+### Routing
+
+Manages navigation within the application. Based on `giant-routing`.
+
+- Maintains current route
+- Provides navigation API
+- Notifies relevant components of route changes
+
+Controls `window.location`, is controlled by the 'widgets' component.
