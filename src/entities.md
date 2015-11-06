@@ -285,6 +285,8 @@ Entity key classes are evented, which means they offer simplified means for subs
         });
 ```
 
+Access events are often used for kicking off on-demand fetching from the back end API. In certain cases, eg. when testing the presence of an entity, access events are undesirable. Class `Entity` implements the method `getSilentNode`, which works exactly like `.getNode()`, except for triggering access events.
+
 Data binding
 ------------
 
