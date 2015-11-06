@@ -8,7 +8,7 @@ OOP
 |:-------|:----------|
 | `npm install giant-oop` | `$oop` |
 
-Giant is a strongly object oriented framework. The OO paradigm permeates all of its components: with very few exceptions, everything is a *class*, *trait*, or *interface*. Giant makes use the *prototypal* nature of JavaScript to build classes, however, it goes around the language's built-in *classical*, single inheritance pattern mostly associated with constructor functions and the `new` keyword. Giant introduces its own class system based on [prototypal inheritance](https://developer.mozilla.org/en/docs/Web/JavaScript/Inheritance_and_the_prototype_chain), adding powerful concepts and tools assisting the way classes are built, instantiated, and tested. These concepts include (quasi-) multiple inheritance, surrogates, memoization, and built-in mocks.
+Giant is a strongly object oriented framework. The OO paradigm permeates all of its components: with very few exceptions, everything is a *class*, *trait*, or *interface*. Giant makes use of the *prototypal* nature of JavaScript to build classes, however, it goes around the language's built-in *classical*, single inheritance pattern mostly associated with constructor functions and the `new` keyword. Giant introduces its own class system based on [prototypal inheritance](https://developer.mozilla.org/en/docs/Web/JavaScript/Inheritance_and_the_prototype_chain), adding powerful concepts and tools assisting the way classes are built, instantiated, and tested. These concepts include (quasi-) multiple inheritance, surrogates, memoization, and built-in mocks.
 
 *ES6 classes*, which bring virtually no extra functionality, only syntax on top of their arguably inflexible ES5 counterparts, are considered an anti-pattern within Giant.
 
