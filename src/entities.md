@@ -8,16 +8,20 @@ Entities
 |:-------|:----------|
 | `npm install giant-entity` | `$entity` |
 
-Giant models the application's data (and parts of its state) in a document-oriented fashion. In this model, Entities are high-level, uniquely identifiable representations of data units of various granularity, having their own APIs for access and manipulation.
+Giant models the application's data (and parts of its state) in a document-oriented fashion. In this model, *entities* are high-level, uniquely identifiable representations of data units of various granularity, having their own APIs for access and manipulation.
 
 Documents, fields, items
 ------------------------
 
-In Giant, the fundamental entity is the *document*. Documents are semantically atomic representations of real-world entities, such as users, sessions, addresses, campaigns, etc. Documents, and in fact all entities within Giant might have their own internal structure made up of more specific entities. The difference is, that while any entity can be the owner of attribute entities, only documents might have fields.
+In Giant, the fundamental entity is the *document*. Documents are semantically atomic representations of real-world entities, such as users, sessions, addresses, campaigns, etc. Entities possess internal structure, made up of *attributes*. Certain entity types have special attributes: documents have *fields*, fields have *value*, *collections* have *items*, and so on.
 
-*Fields*, which represent single properties of documents, might only have a value entity besides its attributes. Based on the field's type, which may be singular (default), or collection, the value might itself have an entity structure of collection items.
+> By default special attributes are identical to the parent entity.
 
-*Items*, for convenience reasons, are interchangeable with singular fields, and therefore share the same structure: a value, which in this case cannot contain further items, and other attributes.
+Documents' special attribute is the *fields* entity. A flat, associative list of *field* entities. Besides *fields*, the document might have other attributes. By default, the document entity is identical to its *fields* attribute, and has no other attributes.
+
+The field entity's special attribute is the *value*, which holds the actual value associated with the field. For singular fields, the value is either a primitive, or an object with non-repetitive structure. For collection fields, the value is an *items* entity, holding a flat, associative list of *item* entities. By default, the field entity is identical to its *value* attribute, and has no other attribute.
+
+Item entities behave the same way as field entities, except items can't be other than singular. They have attributes, including *value*, to which they're identical much like field entities. For convenience reasons, items are interchangeable with fields on the code level: they share the same base class and API. 
 
 ![Document Structure](https://raw.githubusercontent.com/giantjs/giant-developer-guide/master/images/Document%20Structure.png)
 
@@ -36,25 +40,30 @@ A specific Giant class implements each of the above. `$entity.EntityKey` and `$e
 - for documents: `DocumentKey`, and `Document`
 - for fields: `FieldKey`, `Field`, `CollectionField`, and `OrderedCollectionField`
 - for items: `ItemKey`, `ReferenceItemKey`, and `Item`
+- for general attributes: `Attribute`, and `AttributeKey` 
+
+~~Check the API documentation for implementation details.~~
 
 Let's take a moment to examine the irregular classes: `OrderedCollectionField` and `ReferenceItemKey`.
 
-A normal `CollectionField` implements a general API to access / modify the collection's contents. However, `CollectionField` does not care about the actual contents of the collection, as long as *some* value is associated with each item ID. In an `OrderedCollectionField` however, the values, or the `order` attribute of the values must represent the index of the current item within the ordered collection, and therefore implements a number of extra methods to perform order-related operations.
+A normal `CollectionField` implements a general API to access / modify the collection's contents. However, `CollectionField` does not care about the actual contents of the collection, as long as *some* value is associated with each item ID. In an `OrderedCollectionField` however, the values, or the `order` property of the value nodes must represent the index of the current item within the ordered collection, and therefore implements a number of extra methods to perform order-related operations.
 
 Collections might be configured in a way that the item ID is set up to be a reference type, ie. the string representation of a `DocumentKey` instance. In these cases, the referenced document key is part of the `ItemKey`, and to avoid unnecessarily repetitive string-to-key conversions, a `referenceKey` property is added to `ReferenceItemKey` instances.
 
-> References are the only way in Giant to 'compose' documents. Sub-documents are an anti-pattern.
+> References are the only way in Giant to 'compose' documents. Sub-documents are not supported.
 
 ### Examples
 
-The following examples creates a keys & entities in various ways. Always use the one that best suits the entities / keys currently available in your application. If you have an entity, and need the key for it, access its `entityKey` property. If you need a key to a child entity, use `getFieldKey` or `getItemKey` methods.
+The following examples create keys and entities in various ways. Always use the one that best suits the entities or keys currently available in your application. If you have an entity, and need the key for it, access its `entityKey` property. If you need a key to a child entity, use `getFieldKey` or `getItemKey` methods.
 
 ```js
 // key to 'user' document of ID '1'
 'user/1'.toDocumentKey()
+['user', '1'].toDocumentKey()
 
 // these resolve to equivalent document instances
 'user/1'.toDocument()
+['user', '1'].toDocument()
 'user/1'.toDocumentKey().toDocument() 
 'user/1'.toDocumentKey().toEntity()
 
@@ -78,7 +87,13 @@ Data associated with entities resides in a central datastore, composed of three 
 
 ### Entities
 
-Entity data is stored in `$entity.entities`, in the semi-structured manner that is expected from a document-oriented database. Documents are grouped by type, and include their fields, and collection items. Note that document types are not collections themselves, as they are in MongoDB for instance. You can't access all documents of a certain type through the entity API, although it is possible to do on a lower level. For this reason, groups of documents must always be referenced from a field on a document that we already have access to.
+Entity data is stored in `$entity.entities`, in the semi-structured manner that is expected from a document-oriented database. Documents are grouped by type, and include their fields, and collection items. Note that document types are not collections themselves, as they are in MongoDB for instance. You can't access all documents of a certain type through the entity API, although it is possible to do on a lower level.
+
+For this reason:
+
+> Groups of documents must always be referenced from a field on a document that we already have access to.
+
+The JSON below illustrates the contents of the `entities` container.
 
 ```json
 {
@@ -118,7 +133,7 @@ Descriptive information *about* documents, fields, and items are kept in `$entit
 }
 ```
 
-We see 3 documents above, describing 3 fields in the current schema. The documents' type is "field", their IDs are respectively "user/firstName", "user/lastName", and "user/emails".
+We see three documents above, describing three fields in the current schema. The documents' type is "field", their IDs are "user/firstName", "user/lastName", and "user/emails", respectively.
 
 > When you define your own schema, make sure you append to the config container's "field" node, using `.appendNode()`, to avoid overwriting existing metadata.
 
@@ -131,13 +146,13 @@ $entity.config.appendNode('field'.toPath(), {
 });
 ```
 
-The `reference` type may be assigned to `fieldType`, `itemType`, as well as `itemIdType`. It tells the entity system to treat this field as a reference to another document. 
+The `reference` type may be assigned to `fieldType`, `itemType`, and `itemIdType`. It tells the entity system to treat this field as a reference to another document. The `reference` type is reserved for forward compatibility. 
 
 ### Index
 
-What makes an application really *data-driven*, is the ability to query and process entities, and do it fast. To that end, Giant maintains an index container: `$entity.index`. It usually starts out blank, unless there's some index data that is not attainable from the API.
+What makes an application really *data-driven*, is the ability to query and process entities, and do it fast. To that end, Giant maintains an index container: `$entity.index`. It usually starts out blank, unless there's some index data that is not attainable through the API.
 
-> It's the responsibility of the application to maintain indexes.
+> It's the application's responsibility to maintain indexes.
 
 A typical start-of-word search index would look like this:
 
@@ -205,7 +220,7 @@ Entity instances can get and set entity nodes relying on the path information ob
 
 ### Fields and items
 
-While `.setNode()` is the standard way of setting entity data on all entity classes, `Field` (and its subclass `Item`) implements the `.setValue()` shorthand to set the node on its special, 'value' attribute, which, by default, is equivalent to the field or item itself.
+While `.setNode()` is the standard way of setting entity data on all entity classes, `Field` (and its subclass `Item`) implements the `.setValue()` shorthand to set the node right on its *value* attribute. (Which, as discussed above, by default, is equivalent to the field or item itself.)
 
 > For forward compatibility reasons it's always safer to use `Field.setValue()` and `Item.setValue()` to set the values of fields and items.
 
@@ -230,7 +245,7 @@ Only when these three steps have succeeded can we attempt again to access the da
 Entity events
 -------------
 
-Entity manipulation triggers events in the event space `$entity.entityEventSpace`. Attempting to access an absent node triggers `$entity.EVENT_ENTITY_ACCESS`, changing a node triggers `$entity.EVENT_ENTITY_CHANGE`. All events are triggered on the entity path prepended with 'entity', serving as root path for all entity events.
+Entity manipulation triggers events in the event space `$entity.entityEventSpace`. Attempting to access an absent node via the entity API triggers `$entity.EVENT_ENTITY_ACCESS`, changing a node triggers `$entity.EVENT_ENTITY_CHANGE`. All events are triggered on the entity path prepended with 'entity', serving as root path for all entity events.
 
 The following example logs all entity changes, including the affected key, the before, and after values. 
 
@@ -248,18 +263,18 @@ $entity.entityEventSpace
         });
 ```
 
-The event's `sender` for entity events holds the associated entity key. Event instance properties `beforeNode` and `afterNode` are specific to entity change events, implemented by the `EntityChangeEvent` class. 
+The event's `sender` for entity events holds the associated entity key. Event instance properties `beforeNode` and `afterNode` are specific to entity change events, implemented by the `$entity.EntityChangeEvent` class. 
 
-With the above event subscription in place, here's what we'd get for updating a single field:
+With the above event subscription in place, here's what we'd get by updating a single field:
 
 ```js
 'user/2/firstName'.toField().setValue("Jen");
 // entity changed: user/2/firstName undefined Jen
 ```
 
-Setting the same value again would not trigger another event.
+Setting the same value again (based on strict equality) would not trigger another event.
 
-As entity keys are evented, one may subscribe to entity events on keys, too:
+Entity key classes are evented, which means they offer simplified means for subscribing to entity events.
 
 ```js
 'user/2/firstName'.toFieldKey()
@@ -273,19 +288,19 @@ As entity keys are evented, one may subscribe to entity events on keys, too:
 Data binding
 ------------
 
-Binding manages event subscriptions for class instances. It maintains a registry of event handlers relevant to the *bound* instance, indexed by event names, method names, and in the case of entities, entity keys. Binding offers considerable flexibility over the regular event subscription API, in that it allows handler functions to be wrapped, potentially adding extra functionality on top of the actual handler methods.
+Binding manages event subscriptions for class instances. It maintains a registry of event handlers relevant to the *bound* instance, indexed by event names, method names, and in the case of entities, entity keys. Binding offers considerable flexibility over the regular event subscription API, in that it allows handler functions to be wrapped, potentially adding extra functionality on top of the specified handler methods.
 
 In the context of entities, binding endows application components to react to entity changes. There are three different kinds of data binding in Giant:
  
-- **Simple replacement binding**, which gets triggered only when the observed entity node gets replaced: `.bindToEntityChange()`,
-- **Content binding**, which detects any change within the observed node: `.bindToEntityContentChange()`,
+- **Simple replacement binding**, triggering the handler only when the observed entity node gets replaced: `.bindToEntityChange()`,
+- **Content binding**, capturing any change within the observed node: `.bindToEntityContentChange()`,
 - And **delegated binding**, where changes are captured on nodes being closer to the root of the observed path, but are treated as if they occurred right there: `.bindToDelegatedEntityChange()`.
 
 > Data binding in Giant is agnostic about how entity data gets updated, and has nothing to do with API access.
 
 Classes must have the `$entity.EntityBound` trait in order to be data-bound. This trait provides the binding API, and maintains the bindings.
 
-The following example illustrates delegated binding. The first change only changes Fido's 'hungry' field from `false` to `true`. The second change overwrites the entire Fido document with the property 'hungry' set to `false`.
+The following example illustrates delegated binding. The first update only changes Fido's 'hungry' field from `false` to `true`. The second update overwrites the entire Fido document with the property 'hungry' set to `false`.
 
 ```js
 var HungryDog = $oop.Base.extend()
@@ -321,6 +336,8 @@ var fidoKey = 'dog/fido'.toDocumentKey(),
 
 hungryDog.unbindAll();
 ```
+
+It is important to unbind once the instance is no longer in use. With components that have a life cycle, binding and unbinding usually takes place in life cycle callbacks.
 
 Custom `Document` classes
 -------------------------
