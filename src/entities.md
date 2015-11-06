@@ -216,7 +216,7 @@ Among the many responsibilities of a key instance is to resolve the information 
 
 Through the above example key strings and path string look very similar, however this would change with the introduction of entity attributes.
 
-Entity instances can get and set entity nodes relying on the path information obtained from the associated key (`.entityKey`). To get the entity node, one would have to call `.getNode()` on it, to set it, `.setNode()` respectively. So far the entity API seems to resemble that of `$data.Tree`, except here we're not passing any path information. The same similarity may be observed for node removal, as `.unsetNode()` and `.unsetKey()` are both implemented on `Entity`, too.
+Entity instances can get and set entity nodes relying on the path information obtained from the associated key (`.entityKey`). To get the entity node, one would have to call `.getNode()` on it, to set it, `.setNode()` respectively. So far the entity API seems to resemble that of `$data.Tree`, except here we're not passing any path information. The same similarity may be observed for appending nodes, and node removal, as `.appendNode()`, `.unsetNode()`, and `.unsetKey()` are also implemented on `Entity`.
 
 ### Fields and items
 
@@ -341,3 +341,44 @@ It is important to unbind once the instance is no longer in use. With components
 
 Custom `Document` classes
 -------------------------
+
+For convenience reasons, applications are encouraged to implement `Document` overrides, in order to provide domain-specific APIs for documents.
+
+Imagine in our user example, that we can call specific, semantically named functions to fetch or modify entity data.
+
+```js
+'user/1'.toDocument().getFirstName()
+// "John"
+
+'user/1'.toDocument().getHomeEmail() 
+// "john.smith@homeemail.com"
+```
+
+To do this, first we need to define the `Document` override.
+
+```js
+var UserDocument = $entity.Document.extend()
+    .addMethods({
+        getFirstName: function () {
+            return this.getField('firstName')
+                .getValue();
+        },
+        getHomeEmail: function () {
+            return this.getField('emails')
+                .getItem('home')
+                .getValue();
+        }
+    });
+```
+
+Once we have that, the next and final step would be to direct any 'user' document instantiation to our override class. After this, the expressions above will work as expected.
+
+```js
+$entity.Document
+    .addSurrogate(
+        window,
+        'UserDocument',
+        function (documentKey) {
+            return documentKey.documentId === 'user';
+        });
+```
