@@ -8,7 +8,7 @@
 6. [OOP](oop.md)
 7. ~~Utils & Async~~
 8. [Data Structures](data-structures.md)
-9. ~~Universal Events~~
+9. [Universal Events](universal-events.md)
 10. ~~Templating~~
 11. ~~Indexed Tables~~
 12. [Entities](entities.md)
