@@ -68,21 +68,40 @@ To trigger an event, first one must be created or spawned, then have any extra i
 
 ```js
 $event.eventSpace
-    .spawnEvent('event-name')
-    .setPayloadItem('payload-name', payloadValue)
-    .triggerSync(eventPath);
+    .spawnEvent('dog.bark')
+    .triggerSync('dog>Fido'.toPath());
 ```
 
-Or, on an instance of an `Evented` class:
+Or, on an instance of an `Evented` class: (More about `Evented` classes later on.)
 
 ```js
-evented
-    .spawnEvent('event-name')
-    .setPayloadItem('payload-name', payloadValue)
+fido
+    .spawnEvent('dog.bark')
     .triggerSync();
 ```
 
 As the examples show, events are triggered synchronously. This means that all handlers associated with this event will be called before execution proceeds to the line after the trigger. In the second example no path argument is being passed to `.triggerSync()`, as the evented instance already has that information.
+
+Broadcasting events
+-------------------
+
+Events normally bubble from the end of the affected path toward its root. In certain situations though, we might want to notify a number of subscribed components at once. Giant makes this possible, as long as the components in question share a common root on their event paths.
+
+Here's how we'd make an entire pack of dogs bark, assuming the event path associated with a single dog follows the `'dog>packName>dogName'` structure, and there events are listened to in `$event.eventSpace`:
+
+```js
+$event.eventSpace
+    .spawnEvent('dog.bark')
+    .broadcastSync('dog>101dalmatians'.toPath());
+```
+
+> Broadcasting an event invokes all corresponding handlers subscribed on paths relative to the target path.
+
+Handlers will be called in an undetermined order, after which the event will bubble from the target path as if it was triggered there.
+
+> Use broadcasting when the intended listener is not known at the time of triggering te event.
+
+**Use broadcasting sparingly.** Depending on the number and complexity of subscribed handlers, the process might have considerable performance implications, especially, when done frequently. Combine broadcasting with techniques like de-bouncing, and keep handlers few and light.
 
 Subscribing to events
 ---------------------
