@@ -21,6 +21,8 @@ Other examples are:
 
 Unlike DOM events, paths and events in Giant are not tied to the structures they represent. An event may be triggered on a path even when there is nothing corresponding to it. This feature comes handy when the purpose of an event is meant to signal the absence of something, which would not be possible in the DOM for instance.
 
+![Event Bubbling](https://raw.githubusercontent.com/giantjs/giant-developer-guide/master/images/Event%20Bubbling.png)
+
 Terms
 -----
 
@@ -37,12 +39,14 @@ Terms
 Event space
 -----------
 
-An event space is the structure in which events are triggered and listened to. Each event is created within the confines of an event space, and cannot cross between event spaces. The event space governs the event's traversal within the space. Event spaces are usually specific to the feature the events of which they transmit: routing, back end API, datastores, etc.
+The event space is the structure in which events are triggered and listened to. Each event is created within the confines of an event space, and cannot cross between event spaces. The event space governs the event's traversal within the space. Event spaces are usually specific to the feature the events of which they transmit: routing, back end API, datastores, etc.
 
-Giant introduces a general purpose event space instance: `$event.eventSpace`. Unless we expect substantial number of subscriptions to be associated with to a specific application component, such as entities or widgets, this event space is sufficient for triggering events in. Otherwise we need a new `EventSpace` instance to be created for such components, eg. `$entity.entityEventSpace`, or `$widget.widgetEventSpace` for entities and widgets, respectively.
+Giant introduces a general purpose event space instance: `$event.eventSpace`. Unless we expect substantial number of subscriptions to be associated with a specific application component, such as entities or widgets, this basic event space will be sufficient for triggering events in. Otherwise we'll need a new `EventSpace` instance to be created for such components, eg. `$entity.entityEventSpace`, or `$widget.widgetEventSpace` for entities and widgets, respectively.
 
-Events
-------
+> It's a good idea to have the first (root) key in an event path identify the component, eg. 'entity' in `'entity>user>1>fullName'`, to make sure event paths are unique within a shared event space.
+
+Event
+-----
 
 `Event` is the central concept and class of Giant's event mechanism. Each event is endowed with an *event name* and is permanently associated with an event space. Events may be created ad-hoc, as: `$event.Event.create()`, but this is in fact rarely used. Events are, by and large, spawned by a structure implementing the `EventSpawner` interface, like event spaces and evented classes.
 
@@ -231,7 +235,7 @@ fido.triggerSync('dog.bark');
 Tracing events
 --------------
 
-Very often the handling of an event depends on the causal chain that led to triggering that event. To this end, Giant implements an `originalEvent` property on every event instance. This way, different action may be taken when a route change was caused by user navigation, or landing on the route for the first time.
+Very often the handling of an event depends on the causal chain that led to triggering that event. To this end, Giant implements an `originalEvent` property on event instances. This way, different action may be taken when reacting to events, eg. discerning whether a route change was caused by user navigation, or landing on the route for the first time.
 
 The distinction is made by looking at the chain of original events, and discerning the relevant origin. For instance, looking at the last original event:
 
