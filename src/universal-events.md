@@ -8,7 +8,7 @@ Universal Events
 |:-------|:----------|
 | `npm install giant-event` | `$event` |
 
-In a system of interacting components, inversion of control, and separation of concerns are cornerstones of scalability and clarity of design. A mechanism through which self-contained units listen to shared structures to which other units may communicate changes in their state, implements both features. In Giant, these shared structures are called *event spaces*, traversed by *events* along *paths*, in a process called *bubbling*.
+In a system of interacting components, inversion of control, and separation of concerns are cornerstones of scalability and clarity of design. A mechanism through which self-contained components listen to shared structures to which other components may communicate changes in their state, implements both features. In Giant, these shared structures are called *event spaces*, traversed by *events* along *paths*, in a process called *bubbling*.
 
 The purpose of Giant's event module is to generalize eventing to any application component or data structure that can be expressed through or mapped to a path. Drawing on analogy with the DOM, parent-children relationships between nodes define such a path.
 
@@ -16,10 +16,10 @@ Other examples are:
 
 - application *routes*, such as `'users/john-smith'`, or `'articles/weather/04042015'`
 - API resources, such as `'session/1234abcd'`
-- internal datastore paths, such as `'user/1/fullName'`
+- internal datastore keys, such as `'user/1/fullName'`
 - file paths such as `'images/logo.png'`
 
-Unlike DOM events, paths and events in Giant are not tied to the structures they represent. An event may be triggered on a path even when there is nothing corresponding to it. This feature comes handy when the purpose of an event is meant to signal the absence of something, which would not be possible in the DOM for instance.
+Unlike DOM events, paths and events in Giant are not tied to the structures they represent. An event may be triggered on a path even when there is nothing corresponding to it. This feature comes handy when the purpose of an event is to signal the absence of something, which would not be possible in the DOM for instance.
 
 ![Event Bubbling](https://raw.githubusercontent.com/giantjs/giant-developer-guide/master/images/Event%20Bubbling.png)
 
@@ -43,7 +43,7 @@ The event space is the structure in which events are triggered and listened to. 
 
 Giant introduces a general purpose event space instance: `$event.eventSpace`. Unless we expect substantial number of subscriptions to be associated with a specific application component, such as entities or widgets, this basic event space will be sufficient for triggering events in. Otherwise we'll need a new `EventSpace` instance to be created for such components, eg. `$entity.entityEventSpace`, or `$widget.widgetEventSpace` for entities and widgets, respectively.
 
-> It's a good idea to have the first (root) key in an event path identify the component, eg. 'entity' in `'entity>user>1>fullName'`, to make sure event paths are unique within a shared event space.
+> It's a good idea to have the first (root) key in an event path identify the component, eg. 'entity' in `'entity>document>user>1>fullName'`, to make sure event paths are unique within a shared event space.
 
 Event
 -----
