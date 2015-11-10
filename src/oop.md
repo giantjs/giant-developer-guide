@@ -280,6 +280,51 @@ This has a number of effects to watch out for.
 - Fetching instances of memoized subclasses that are instantiated via surrogates is slower than instantiating the subclass directly. Consider this in performance-critical situations.
 - The instance registry of a subclass hides the instance registry of the base class (if there is one). Though this is not expected to cause problems as long as memoization is set up unambiguously.
 
+Method elevation
+----------------
+
+Passing class methods as callbacks might have unexpected effects if we're not careful about setting the context. To resolve this issue, we might choose to wrap the callback in a closure, or bind the context to the current instance via `Function.prototype.bind`. When we're passing methods as event handlers to a subscription process, we might also want to keep the *bound* method for re-using it later on releasing the subscription. To simplify binding as well as re-use, Giant introduces the concept of *method elevation* through `Base.elevateMethod`.
+
+> Method elevation binds the method to the current instance and sets it as a property on the *instance*.
+
+The elevated method will cover (override) the original, which means that accessing / invoking the elevated method looks exactly the same as accessing / invoking the original method *before* elevation.
+
+```js
+var Dog = $oop.Base.extend()
+    .addMethods({
+        init: function (name) {                   
+            this.elevateMethods('bark');
+            this.name = name;
+        },
+        bark: function () {
+            alert(this.name + " says woof");
+        },
+        jump: function () {
+            alert(this.name + " jumped");
+        }
+    });
+    
+var fido = Dog.create("Fido");
+
+// separating methods from instance
+var jump = fido.jump,
+    bark = fido.bark;
+    
+fido.bark();
+// "Fido says woof"
+
+bark(); // elevated
+// "Fido says woof"
+
+fido.jump();
+// "Fido jumped"
+
+jump(); // not elevated / bound
+// throws TypeError in strict mode
+```
+
+Just like context binding, elevating a method more than once brings no additional advantages.
+
 Type checking
 -------------
 
