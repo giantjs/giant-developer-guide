@@ -82,12 +82,14 @@ fido
 
 As the examples show, events are triggered synchronously. This means that all handlers associated with this event will be called before execution proceeds to the line after the trigger. In the second example no path argument is being passed to `.triggerSync()`, as the evented instance already has that information.
 
+Implementing asynchronous triggering is up to the application, by using `setTimeout`, or promises, etc.
+
 Broadcasting events
 -------------------
 
 Events normally bubble from the end of the affected path toward its root. In certain situations though, we might want to notify a number of subscribed components at once. Giant makes this possible, as long as the components in question share a common root on their event paths.
 
-Here's how we'd make an entire pack of dogs bark, assuming the event path associated with a single dog follows the `'dog>packName>dogName'` structure, and there events are listened to in `$event.eventSpace`:
+Here's how we'd notify the application that an entire pack of dogs is barking, assuming that the event path associated with a single dog follows the `'dog>packName>dogName'` structure, and there events are being listened to in `$event.eventSpace`:
 
 ```js
 $event.eventSpace
@@ -95,7 +97,7 @@ $event.eventSpace
     .broadcastSync('dog>101dalmatians'.toPath());
 ```
 
-> Broadcasting an event invokes all corresponding handlers subscribed on paths relative to the target path.
+> Broadcasting an event invokes all corresponding handlers subscribed on paths *relative* to the target path.
 
 Handlers will be called in an undetermined order, after which the event will bubble from the target path as if it was triggered there.
 
@@ -120,19 +122,19 @@ function onRouteChange (event) {
 }
 
 $routing.routingEventSpace.subscribeTo(
-    $routing.EVENT_ROUTE_CHANGE,
-    'user'.toPath(), 
-    onRouteChange);
+    $routing.EVENT_ROUTE_CHANGE, // event name
+    'user'.toPath(),             // capture path
+    onRouteChange);              // handler
 ```
 
 **On an `Evented` class or instance**
 
-The `$routing.Route` class has the `Evented` trait, and may be instantiated by conversion from an array or string. Notice that in this case we don't need to specify the event path, as it is carried by the `Route` instance itself.
+The `$routing.Route` class has the `Evented` trait, and may be instantiated by conversion from an array or string. Notice that in this case we don't need to specify the event path, as it is carried by the `Evented` (`Route`) instance itself.
 
 ```js
 'user'.toRoute().subscribeTo(
-    $routing.EVENT_ROUTE_CHANGE, 
-    onRouteChange);
+    $routing.EVENT_ROUTE_CHANGE, // event name
+    onRouteChange);              // handler
 ```
 
 Overriding `Event`
@@ -145,7 +147,7 @@ It's very rare that events are not subclassed, as it helps
  
 For instance, the ~~Routing~~ module's `RoutingEvent` adds route-specific properties and methods that make processing the event in a handler much easier.
 
-When subclassing `Event`, it's usually a good idea to set up surrogates based on either event space, or event name, or both. This would make sure that events spawned on specific event spaces or specific types of `Evented` classes end up being the right type. The default implementation(s) of `EventSpawner.spawnEvent()` instantiate the base event class. The other option would be to override these default `spawnEvent()` implementations in your own event space / evented classes, which would work just as well but requires more code to be maintained.
+When subclassing `Event`, it's usually a good idea to set up surrogates based on either event name, or event space, or both. This would make sure that events spawned with specific names or on specific event spaces end up being the right type. The default implementation(s) of `EventSpawner.spawnEvent()` instantiate the base event class. (One may also override `spawnEvent()`, but that's and arguably less robust solution.)
 
 A suitable surrogate might look look this:
 
@@ -201,14 +203,14 @@ fido.triggerSync('dog.bark');
 // "Fido barked"
 ```
 
-Note that we subscribe to Fido's events *statically*, ie. outside of the instance's life cycle. This is to make sure we're not subscribing more than once. In case our instance does have a life cycle, as is the case with widgets, subscribing at the start of the cycle and unsubscribing at the end is a good practice.
+Note that we subscribe to Fido's events *statically*, ie. outside of the instance's life cycle. This is to make sure we're not subscribing more than once. In case our instance does have a life cycle, as is the case with widgets for example, subscribing at the start of the cycle and unsubscribing at the end is a good practice.
 
 The importance of method elevation
 ----------------------------------
 
 Event subscription methods take a handler function as one of their arguments, a function that will end up being called back by the internal event mechanism. In an object oriented setup, one is usually passing methods to event subscriptions, but as we know in JavaScript doing so makes the method lose its context. Unless, of course, it's bound to one. Ad-hoc binding is simple, but inconvenient, especially if you need the re-use the function reference at unsubscription. Giant's [OOP](oop.md) module implements method elevation - binding methods to the instance in a reusable way - which is heavily encouraged in evented and listener classes.
 
-The example below re-implements the dog-barking scenario from above with methods for handlers.
+The example below re-implements the dog-barking scenario from before with methods for handlers.
 
 ```js
 var Dog = $oop.Base.extend()
@@ -280,13 +282,13 @@ onBark: function (event) {
     var originalEvent = event
         .getOriginalEventByName('sky.thunder');
     if (originalEvent) {
-        console.log("barking due to thunder");
+        console.log("barking b/c scared");
     }
 }
 // ...
 ```
 
-In order to have a meaningful original event on our barking handler, our class must subscribe to the appropriate event, eg. `sky.thunder`, and trigger a bark event in response.
+In order to have a meaningful original event on our 'barking' handler, our class must subscribe to the appropriate event, eg. `sky.thunder`, and trigger a bark event in response.
 
 If the secondary event is triggered synchronously, there's nothing special to be done in the handler, other than (eventually) triggering the event.
 
@@ -300,7 +302,7 @@ onThunder: function () {
 
 However, when the secondary event is fired asynchronously, the handler must return a [*thenable*](http://wiki.commonjs.org/wiki/Promises/A), which gets resolved / rejected *after* the secondary event is triggered.
 
-The example below uses a [Q](https://github.com/kriskowal/q) promise.
+The example below uses a [Q](https://github.com/kriskowal/q) promise to do this.
 
 ```js
 // ...
