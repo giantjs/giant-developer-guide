@@ -13,7 +13,7 @@
 11. ~~Indexed Tables~~
 12. [Entities](entities.md)
 13. ~~I18n~~
-14. ~~Routing~~
+14. [Routing](routing.md)
 15. ~~API Access~~
 16. ~~Widgets~~
 17. ~~Asset Mgmt~~
