@@ -9,7 +9,7 @@
 7. ~~Utils & Async~~
 8. [Data Structures](data-structures.md)
 9. [Universal Events](universal-events.md)
-10. ~~Templating~~
+10. [Templating](templating.md)
 11. ~~Indexed Tables~~
 12. [Entities](entities.md)
 13. ~~I18n~~
