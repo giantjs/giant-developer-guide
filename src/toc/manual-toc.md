@@ -12,7 +12,7 @@
 10. [Templating](templating.md)
 11. ~~Indexed Tables~~
 12. [Entities](entities.md)
-13. ~~I18n~~
+13. [I18n](i18n.md)
 14. ~~Routing~~
 15. ~~API Access~~
 16. ~~Widgets~~
