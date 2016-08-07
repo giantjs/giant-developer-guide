@@ -123,5 +123,17 @@ We can use this as the basis for determining whether a captured routing event fi
 
 Functionally, this will be equivalent to the one above, but without the constraints.
 
-Push-state vs. hash
+PushState vs. hash
 -------------------
+
+Giant supports both hash and pushState as the basis for manifesting the route in the URL.
+
+To specify which one is to be used, set the library global flag `usePushState`, *right after* loading the routing module.
+
+```js
+$routing.usePushState = true; // or, false
+```
+
+[PushState](https://developer.mozilla.org/en-US/docs/Web/API/History_API) looks cleaner in the URL, but requires that possible routes are validated on the static file server serving up `index.html`.
+
+Hash does not require any server-side support, as it relies on the [URL fragment](https://en.wikipedia.org/wiki/Fragment_identifier), but introduces a hash ('#') character between the path to `index.html` and the route string.
