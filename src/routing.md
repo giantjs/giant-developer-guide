@@ -8,9 +8,9 @@ Routing
 |:-------|:----------|
 | `npm install giant-routing` | `$routing` |
 
-*Routes* are meant to reflect a high-level state of the application. They make functional components, like pages, or modules, and their various states identifiable, so that the user may return to find the same component in the same state at a later time by navigating to the same route.
+*Routes* reflect high-level states of the application. They make functional components, like pages, or modules, and their various states identifiable, so that the user may return to find the same component in the same state at a later time by navigating to the same route.
  
-In the browser, routes usually manifest in the URL, which may be controlled directly, or through te browser's navigation controls. (*back*, *forward*, *reload*, *history*, etc.)
+In the browser, routes usually manifest in the address bar, which may be controlled directly, or through the browser's navigation controls. (*back*, *forward*, *reload*, *history*, etc.)
 
 ![Sample Application Route](https://raw.githubusercontent.com/giantjs/giant-developer-guide/master/images/Application%20Route.png)
 
@@ -26,12 +26,12 @@ In Giant, routes are represented by instances of the class `$routing.Route`. Thi
 ['dog', 'fido', 'photos'].toRoute()
 ```
 
-Array to `Route` conversion allows you to instantiate an empty (root) route `[].toRoute()`, which is most useful in capturning routing events triggered on any route.
+Array to `Route` conversion allows you to instantiate an empty (root) route `[].toRoute()`, which is most useful when capturing routing events triggered on any route.
 
 Navigation
 ----------
 
-The major role of routes in an application is to provide a transparent means of navigating between different states of the application. Giant's routing mechanism allows three different modes of navigation: *immediate*, *asynchronous*, and *debounced*. There's also silent navigation, which immediately alters the route within the application, triggering associated events, but does not update the URL. This is useful when there is no URL, e.g. in Node.
+The major role of routes in an application is to provide transparent means of navigating between different states of the application. Giant's routing mechanism allows three different modes of navigation: *immediate*, *asynchronous*, and *debounced*. There's also silent navigation, which immediately alters the route within the application, triggering associated events, but does not update the browser location. This is useful when there is no browser location, e.g. in Node.
 
 Asynchronous navigation is used when we want the application to finish running any synchronous code before proceeding to navigate.
 
@@ -49,18 +49,18 @@ Detecting route changes
 
 Giant fires a routing event every time
 
-- the route is about to change, ie. leaving the current route
+- the route is about to change, i.e. leaving the current route
 - the route *has* changed
 - the document finished loading at a specific route
 
-Routing events are instances of `$routing.RoutingEvent`, a subclass of `$event.Event`, and have these two properties:
+Routing events are instances of `$routing.RoutingEvent`, a subclass of `$event.Event`, and have these two extra properties:
 
-- `beforeRoute`: a `Route` instance representing the route we're navigating away from
-- `afterRoute`: a `Route` instance representing the route we're navigating to
+- `beforeRoute`: a `Route` instance representing the route we're navigating away from. On page (re)load, `beforeRoute` is not defined.
+- `afterRoute`: a `Route` instance representing the route we're navigating to.
 
 ### Leaving route
 
-Events about leaving the current route gives developers the opportunity to prevent the route change go through.
+Events about leaving the current route gives developers the opportunity to prevent the route change from going through.
 
 ```js
 // prevents navigating to 'dog/photos/fido'
@@ -73,7 +73,7 @@ Events about leaving the current route gives developers the opportunity to preve
 
 ### Route change & document load
 
-Events signaling finished route changes generally manifest as changes in the widget structure, such as switching pages, or changing the focus of the current page. In the following example, `$app.PhotosPage` is a subclass of `$basicWidgets.Page`, which we instantiate and display based on information extracted from the route.
+Events signaling finished route changes generally manifest as changes in the widget structure: switching pages, or shifting the focus of the current page. In the following example, `$app.PhotosPage` is a subclass of `$basicWidgets.Page`, which we instantiate and display when a relevant route was hit.
 
 ```js
 'dog/photos'.toRoute().subscribeTo(
@@ -88,9 +88,9 @@ Route overrides
 
 The route change example above assumes that our routes are structured in a certain way (i.e. 'dog/route/:id'). We don't want a routing component to put such constrains on our application's design. In the next example we'll use a different approach, working with route overrides.
 
-Building on Giant's OOP features, it's very easy to create subclasses of `$routing.Route` based on the route structure.
+Building on Giant's OOP features, it's very easy to create subclasses of `$routing.Route` - representing different domains or pages - and have the correct one instantiate based on the route structure.
 
-If we take out `PhotosPage` example, the subclass would expect the route to start with "dog", "photos" to produce a `PhotosRoute` instance. Once we have our `$app.PhotosRoute` class, extending `$routing.Route`, and optionally adding extra parameters and functionality specific to our "Photos" page, we set up a [surrogate](oop.md#surrogates) definition:
+If we take our `PhotosPage` example, the subclass would expect the route to start with "dog", "photos" to produce a `PhotosRoute` instance. Once we have our `$app.PhotosRoute` class, extending `$routing.Route`, and optionally adding extra parameters and functionality specific to our "Photos" page, we set up a [surrogate](oop.md#surrogates) definition:
 
 ```js
 $routing.Route.addSurrogate(
@@ -121,7 +121,7 @@ We can use this as the basis for determining whether a captured routing event fi
     });
 ```
 
-Functionally, this will be equivalent to the one above, but without the constraints.
+Functionally, this will be equivalent to the one above, but without the unwanted constraints.
 
 PushState vs. hash
 -------------------
