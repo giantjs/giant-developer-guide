@@ -16,6 +16,7 @@
 14. [Routing](routing.md)
 15. ~~API Access~~
 16. ~~Widgets~~
-17. ~~Asset Mgmt~~
-17. ~~Session Mgmt~~
-18. [Best Practices](best-practices.md)
+17. [Basic Widgets](basic-widgets.md)
+18. ~~Asset Mgmt~~
+19. ~~Session Mgmt~~
+20. [Best Practices](best-practices.md)
