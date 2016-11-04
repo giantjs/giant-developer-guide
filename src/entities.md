@@ -4,9 +4,9 @@
 Entities
 ========
 
-| Module | Namespace | 
-|:-------|:----------|
-| `npm install giant-entity` | `$entity` |
+| Module | Namespace | Stability |
+|:-------|:----------|:----------|
+| `npm install giant-entity` | `$entity` | **Stable** |
 
 Giant models the application's data (and parts of its state) in a document-oriented fashion. In this model, *entities* are high-level, uniquely identifiable representations of data units of various granularity, having their own APIs for access and manipulation.
 

@@ -4,9 +4,9 @@
 Data Structures
 ===============
 
-| Module | Namespace |
-|:--------|:----------|
-| `npm install giant-data` | `$data` |
+| Module | Namespace | Stability |
+|:-------|:----------|:----------|
+| `npm install giant-data` | `$data` | **Stable** |
 
 Higher-level modules in Giant do considerable data transformations mostly for maintaining lookups, registries, and indexes. The basic tools and structures that perform such transformations are implemented in `giant-data`.
 

@@ -4,9 +4,9 @@
 Universal Events
 ================
 
-| Module | Namespace | 
-|:-------|:----------|
-| `npm install giant-event` | `$event` |
+| Module | Namespace | Stability |
+|:-------|:----------|:----------|
+| `npm install giant-event` | `$event` | **Stable** |
 
 In a system of interacting components, inversion of control, and separation of concerns are cornerstones of scalability and clarity of design. A mechanism through which self-contained components listen to shared structures to which other components may communicate changes in their state, implements both features. In Giant, these shared structures are called *event spaces*, traversed by *events* along *paths*, in a process called *bubbling*.
 

@@ -4,9 +4,9 @@
 Templating
 ==========
 
-| Module | Namespace | 
-|:-------|:----------|
-| `npm install giant-templating` | `$templating` |
+| Module | Namespace | Stability |
+|:-------|:----------|:----------|
+| `npm install giant-templating` | `$templating` | **Stable** |
 
 In the context of Giant, templates are strings; where the content of marked parameters is deferred to a resolution process. Giant implements its own templating engine, built on common principles with other Giant modules, such as the concept of `Stringifiable`'s and [universal events](universal-events.md).
 

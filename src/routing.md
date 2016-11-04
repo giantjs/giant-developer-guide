@@ -4,9 +4,9 @@
 Routing
 =======
 
-| Module | Namespace | 
-|:-------|:----------|
-| `npm install giant-routing` | `$routing` |
+| Module | Namespace | Stability |
+|:-------|:----------|:----------|
+| `npm install giant-routing` | `$routing` | **Stable** |
 
 *Routes* reflect high-level states of the application. They make functional components, like pages, or modules, and their various states identifiable, so that the user may return to find the same component in the same state at a later time by navigating to the same route.
  

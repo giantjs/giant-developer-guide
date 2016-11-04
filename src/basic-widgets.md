@@ -1,8 +1,12 @@
 <!-- @@@page:manual@@@ -->
-<!-- @@@title:Basic Widgets Demo@@@ -->
+<!-- @@@title:Basic Widgets@@@ -->
 
-Giant Basic Widgets
-===================
+Basic Widgets
+=============
+
+| Module | Namespace | Stability |
+|:-------|:----------|:----------|
+| `npm install giant-basic-widgets` | `$basicWidgets` | **Fairly stable** |
 
 This is testing ground for the *upcoming* `giant-basic-widgets` module. For each widget class, you'll find live examples (marked with red dashed border), instance information, the code used to create the widget, and some hints for things to try.
 
