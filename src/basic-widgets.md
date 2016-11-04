@@ -8,11 +8,16 @@ Basic Widgets
 |:-------|:----------|:----------|
 | `npm install giant-basic-widgets` | `$basicWidgets` | **Fairly stable** |
 
-This is testing ground for the *upcoming* `giant-basic-widgets` module. For each widget class, you'll find live examples (marked with red dashed border), instance information, the code used to create the widget, and some hints for things to try.
+GiantJS promotes *component-oriented* architecture. Components are not restricted to the UI, (ie. ~~model-components~~, ~~transport-components~~) but the UI is where they manifest in the most obvious ways. (For a general explanation of components, see ~~About components~~.)
 
-Open the console to see what's happening, or test widgets' APIs.
+Being component-oriented means **you're not thinking in terms of markup** when you design and code your application. Rater, you start with atomic, *basic* components (widgets), and use them as building blocks to form more complex components, an artifact of which is HTML markup.
 
-> The API of this module is **not stable** at this point. Breaking changes might occur.
+This page walks you through GiantJS' official range of atomic widgets, and lets you play around with them.
+
+- Widget events are captured and logged onto the console.
+- Hints for each widget class give you ideas about interacting with them programmatically.
+
+** A detailed description of each widget class / variant is to follow. **
 
 <div id="app"></div>
 <script src="lib/giant-assertion.js"></script>
